@@ -150,4 +150,31 @@ router.get('/search', async (req, res) => {
   }
 });
 
+// @route   GET /languages
+// @desc    Get list of available programming languages
+// @access  Public
+router.get('/languages', async (req, res) => {
+  try {
+    // In a real app, you might fetch this from a database
+    // For now, we'll return a static list
+    const languages = [
+      'JavaScript',
+      'Python',
+      'Java',
+      'C++',
+      'Ruby',
+      'Go',
+      'PHP',
+      'Swift',
+      'Kotlin',
+      'TypeScript'
+    ];
+    
+    res.json(languages);
+  } catch (error) {
+    console.error('Error fetching languages:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 export default router; 

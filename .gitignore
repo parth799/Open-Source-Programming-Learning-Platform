@@ -65,3 +65,4 @@ mongodb/
 # System Files
 .DS_Store
 Thumbs.db
+.qodo

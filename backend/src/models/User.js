@@ -5,9 +5,9 @@ const userSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
-    unique: true,
     trim: true,
     minlength: 3,
+    maxlength: 30
   },
   email: {
     type: String,
@@ -15,46 +15,42 @@ const userSchema = new mongoose.Schema({
     unique: true,
     trim: true,
     lowercase: true,
+    match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email']
   },
   password: {
     type: String,
     required: true,
-    minlength: 6,
+    minlength: 6
   },
   role: {
     type: String,
-    enum: ['student', 'instructor', 'admin'],
-    default: 'student',
+    enum: ['user', 'instructor', 'admin'],
+    default: 'user'
   },
-  learningProgress: [{
-    language: {
-      type: String,
-      required: true,
-    },
-    completedTopics: [{
-      type: String,
-    }],
-    currentStep: {
-      type: Number,
-      default: 0,
-    },
-    lastAccessed: {
-      type: Date,
-      default: Date.now,
-    },
-  }],
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
+  learningProgress: [
+    {
+      language: {
+        type: String,
+        required: true
+      },
+      progress: {
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 100
+      },
+      completedTopics: [String]
+    }
+  ],
+  resetPasswordToken: String,
+  resetPasswordExpires: Date
+}, {
+  timestamps: true
 });
 
 // Hash password before saving
 userSchema.pre('save', async function(next) {
+  // Only hash the password if it's modified (or new)
   if (!this.isModified('password')) return next();
   
   try {
@@ -66,20 +62,10 @@ userSchema.pre('save', async function(next) {
   }
 });
 
-// Method to compare password
+// Compare password method
 userSchema.methods.comparePassword = async function(candidatePassword) {
-  try {
-    return await bcrypt.compare(candidatePassword, this.password);
-  } catch (error) {
-    throw error;
-  }
+  return await bcrypt.compare(candidatePassword, this.password);
 };
-
-// Update the updatedAt timestamp
-userSchema.pre('save', function(next) {
-  this.updatedAt = Date.now();
-  next();
-});
 
 const User = mongoose.model('User', userSchema);
 
