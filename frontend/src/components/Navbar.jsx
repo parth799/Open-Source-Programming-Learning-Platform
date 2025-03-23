@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 import {
   AppBar,
   Box,
@@ -18,7 +19,10 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
-  Divider
+  Divider,
+  Switch,
+  FormControlLabel,
+  Stack
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -29,16 +33,24 @@ import {
   PersonAdd as PersonAddIcon,
   Dashboard as DashboardIcon,
   School as SchoolIcon,
-  Book as BookIcon
+  Book as BookIcon,
+  Brightness4 as Brightness4Icon,
+  Brightness7 as Brightness7Icon
 } from '@mui/icons-material';
-import { useAuth } from '../contexts/AuthContext';
+import { logout } from '../store/slices/authSlice';
+import { useTheme } from '../contexts/ThemeContext';
+
+const pages = ['Dashboard', 'Languages', 'Resources'];
+const settings = ['Profile', 'Account', 'Logout'];
 
 const Navbar = () => {
   const [anchorElNav, setAnchorElNav] = useState(null);
   const [anchorElUser, setAnchorElUser] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const { currentUser, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+  const { toggleTheme, isDarkMode } = useTheme();
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -63,10 +75,39 @@ const Navbar = () => {
     setDrawerOpen(open);
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleMenuClick = (page) => {
+    handleCloseNavMenu();
+    switch (page) {
+      case 'Dashboard':
+        navigate('/');
+        break;
+      case 'Languages':
+        navigate('/languages');
+        break;
+      case 'Resources':
+        navigate('/resources');
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleSettingClick = (setting) => {
     handleCloseUserMenu();
-    navigate('/login');
+    switch (setting) {
+      case 'Profile':
+        navigate('/profile');
+        break;
+      case 'Account':
+        navigate('/account');
+        break;
+      case 'Logout':
+        dispatch(logout());
+        navigate('/login');
+        break;
+      default:
+        break;
+    }
   };
 
   return (
@@ -90,14 +131,14 @@ const Navbar = () => {
               textDecoration: 'none',
             }}
           >
-            CodeLearn
+            CodeMaster
           </Typography>
 
           {/* Mobile Menu */}
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
             <IconButton
               size="large"
-              aria-label="menu"
+              aria-label="account of current user"
               aria-controls="menu-appbar"
               aria-haspopup="true"
               onClick={toggleDrawer(true)}
@@ -117,57 +158,16 @@ const Navbar = () => {
                 onKeyDown={toggleDrawer(false)}
               >
                 <List>
-                  <ListItem component={RouterLink} to="/" sx={{ textDecoration: 'none', color: 'inherit' }}>
-                    <ListItemIcon>
-                      <DashboardIcon />
-                    </ListItemIcon>
-                    <ListItemText primary="Home" />
-                  </ListItem>
-                  
-                  {isAuthenticated && (
-                    <>
-                      <ListItem component={RouterLink} to="/roadmap/javascript" sx={{ textDecoration: 'none', color: 'inherit' }}>
-                        <ListItemIcon>
-                          <SchoolIcon />
-                        </ListItemIcon>
-                        <ListItemText primary="Learning Paths" />
-                      </ListItem>
-                      
-                      <ListItem component={RouterLink} to="/resources/javascript" sx={{ textDecoration: 'none', color: 'inherit' }}>
-                        <ListItemIcon>
-                          <BookIcon />
-                        </ListItemIcon>
-                        <ListItemText primary="Resources" />
-                      </ListItem>
-                    </>
-                  )}
-                  
-                  <Divider />
-                  
-                  {!isAuthenticated ? (
-                    <>
-                      <ListItem component={RouterLink} to="/login" sx={{ textDecoration: 'none', color: 'inherit' }}>
-                        <ListItemIcon>
-                          <LoginIcon />
-                        </ListItemIcon>
-                        <ListItemText primary="Login" />
-                      </ListItem>
-                      
-                      <ListItem component={RouterLink} to="/signup" sx={{ textDecoration: 'none', color: 'inherit' }}>
-                        <ListItemIcon>
-                          <PersonAddIcon />
-                        </ListItemIcon>
-                        <ListItemText primary="Sign Up" />
-                      </ListItem>
-                    </>
-                  ) : (
-                    <ListItem button onClick={handleLogout} sx={{ color: 'inherit' }}>
+                  {pages.map((page) => (
+                    <ListItem key={page} onClick={() => handleMenuClick(page)}>
                       <ListItemIcon>
-                        <LogoutIcon />
+                        {page === 'Dashboard' && <DashboardIcon />}
+                        {page === 'Languages' && <SchoolIcon />}
+                        {page === 'Resources' && <BookIcon />}
                       </ListItemIcon>
-                      <ListItemText primary="Logout" />
+                      <ListItemText primary={page} />
                     </ListItem>
-                  )}
+                  ))}
                 </List>
               </Box>
             </Drawer>
@@ -191,39 +191,38 @@ const Navbar = () => {
               textDecoration: 'none',
             }}
           >
-            CodeLearn
+            CodeMaster
           </Typography>
 
           {/* Desktop Navigation */}
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-            {isAuthenticated && (
-              <>
-                <Button
-                  component={RouterLink}
-                  to="/roadmap/javascript"
-                  sx={{ my: 2, color: 'white', display: 'block' }}
-                >
-                  Learning Paths
-                </Button>
-                <Button
-                  component={RouterLink}
-                  to="/resources/javascript"
-                  sx={{ my: 2, color: 'white', display: 'block' }}
-                >
-                  Resources
-                </Button>
-              </>
-            )}
+            {pages.map((page) => (
+              <Button
+                key={page}
+                onClick={() => handleMenuClick(page)}
+                sx={{ my: 2, color: 'white', display: 'block' }}
+              >
+                {page}
+              </Button>
+            ))}
           </Box>
 
+          {/* Theme Toggle */}
+          <IconButton sx={{ ml: 1, mr: 2 }} onClick={toggleTheme} color="inherit">
+            {isDarkMode ? <Brightness7Icon /> : <Brightness4Icon />}
+          </IconButton>
+
           {/* User Menu */}
-          <Box sx={{ flexGrow: 0 }}>
-            {isAuthenticated ? (
+          <Box sx={{ flexGrow: 0, display: 'flex', alignItems: 'center' }}>
+            {user ? (
               <>
+                <Typography sx={{ mr: 2 }}>
+                  {user?.username || 'User'}
+                </Typography>
                 <Tooltip title="Open settings">
                   <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                    <Avatar alt={currentUser?.username || 'User'}>
-                      {currentUser?.username?.charAt(0).toUpperCase() || 'U'}
+                    <Avatar alt={user?.username || 'User'} src="/static/images/avatar/2.jpg">
+                      {user?.username ? user.username.charAt(0).toUpperCase() : 'U'}
                     </Avatar>
                   </IconButton>
                 </Tooltip>
@@ -243,12 +242,11 @@ const Navbar = () => {
                   open={Boolean(anchorElUser)}
                   onClose={handleCloseUserMenu}
                 >
-                  <MenuItem component={RouterLink} to="/profile" onClick={handleCloseUserMenu}>
-                    <Typography textAlign="center">Profile</Typography>
-                  </MenuItem>
-                  <MenuItem onClick={handleLogout}>
-                    <Typography textAlign="center">Logout</Typography>
-                  </MenuItem>
+                  {settings.map((setting) => (
+                    <MenuItem key={setting} onClick={() => handleSettingClick(setting)}>
+                      <Typography textAlign="center">{setting}</Typography>
+                    </MenuItem>
+                  ))}
                 </Menu>
               </>
             ) : (
@@ -264,7 +262,7 @@ const Navbar = () => {
                 </Button>
                 <Button
                   component={RouterLink}
-                  to="/signup"
+                  to="/register"
                   color="inherit"
                   variant="outlined"
                   startIcon={<PersonAddIcon />}

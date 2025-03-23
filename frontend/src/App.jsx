@@ -1,64 +1,42 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { Container } from '@mui/material';
 
-// Auth Components
-import Login from './components/auth/Login';
-import Signup from './components/auth/Signup';
-import ForgotPassword from './components/auth/ForgotPassword';
-import ResetPassword from './components/auth/ResetPassword';
-import PrivateRoute from './components/auth/PrivateRoute';
+// Pages
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Home from './pages/Home';
+import LanguagePage from './pages/LanguagePage';
+import Roadmap from './pages/Roadmap';
+import Resources from './pages/Resources';
 
-// Main Components
+// Components
 import Navbar from './components/Navbar';
-import Home from './components/Home';
-import LanguagePage from './components/LanguagePage';
-import Roadmap from './components/Roadmap';
-import Resources from './components/Resources';
-
-// Context
-import { AuthProvider } from './contexts/AuthContext';
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#3f51b5',
-    },
-    secondary: {
-      main: '#f50057',
-    },
-  },
-});
+import PrivateRoute from './components/PrivateRoute';
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <AuthProvider>
-        <Router>
-          <Navbar />
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password/:token" element={<ResetPassword />} />
-            
-            {/* Protected Routes */}
-            <Route element={<PrivateRoute />}>
-              <Route path="/" element={<Home />} />
-              <Route path="/language/:languageId" element={<LanguagePage />} />
-              <Route path="/roadmap/:languageId" element={<Roadmap />} />
-              <Route path="/resources/:languageId" element={<Resources />} />
-            </Route>
-            
-            {/* Redirect any unknown routes to home */}
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
-        </Router>
-      </AuthProvider>
-    </ThemeProvider>
+    <>
+      <Navbar />
+      <Container>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          
+          {/* Protected Routes */}
+          <Route element={<PrivateRoute />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/language/:languageId" element={<LanguagePage />} />
+            <Route path="/roadmap/:languageId" element={<Roadmap />} />
+            <Route path="/resources/:languageId" element={<Resources />} />
+          </Route>
+          
+          {/* Redirect any unknown routes to home */}
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </Container>
+    </>
   );
 }
 
