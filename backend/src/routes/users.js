@@ -8,7 +8,7 @@ const router = express.Router();
 // Register new user
 router.post('/register', async (req, res) => {
   try {
-    const { username, email, password, role } = req.body;
+    const { username, email, password, role, languages } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
@@ -16,12 +16,22 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
+    // Initialize learningProgress array if languages are provided
+    const learningProgress = languages && languages.length > 0
+      ? languages.map(language => ({
+          language,
+          progress: 0,
+          completedTopics: []
+        }))
+      : [];
+
     // Create new user
     const user = new User({
       username,
       email,
       password,
-      role: role || 'student',
+      role: role || 'user',
+      learningProgress
     });
 
     await user.save();

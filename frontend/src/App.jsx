@@ -6,9 +6,11 @@ import { Container } from '@mui/material';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
+import Dashboard from './pages/Dashboard';
 import LanguagePage from './pages/LanguagePage';
 import Roadmap from './pages/Roadmap';
 import Resources from './pages/Resources';
+import ContentDetails from './pages/ContentDetails';
 
 // Components
 import Navbar from './components/Navbar';
@@ -26,14 +28,16 @@ function App() {
           
           {/* Protected Routes */}
           <Route element={<PrivateRoute />}>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<Navigate to="/dashboard" />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/language/:languageId" element={<LanguagePage />} />
             <Route path="/roadmap/:languageId" element={<Roadmap />} />
             <Route path="/resources/:languageId" element={<Resources />} />
+            <Route path="/content/:contentId" element={<ContentDetails />} />
           </Route>
           
-          {/* Redirect any unknown routes to home */}
-          <Route path="*" element={<Navigate to="/" />} />
+          {/* Redirect any unknown routes to dashboard */}
+          <Route path="*" element={<Navigate to="/dashboard" />} />
         </Routes>
       </Container>
     </>

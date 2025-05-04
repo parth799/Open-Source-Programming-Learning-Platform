@@ -19,13 +19,15 @@ export const register = createAsyncThunk(
   'auth/register',
   async (userData, thunkAPI) => {
     try {
+      console.log('Registering user with data:', userData);
       const response = await axios.post(`${API_URL}/users/register`, userData);
       if (response.data) {
         localStorage.setItem('user', JSON.stringify(response.data));
       }
       return response.data;
     } catch (error) {
-      const message = error.response?.data?.message || error.message;
+      console.error('Registration error:', error);
+      const message = error.response?.data?.message || error.message || 'Registration failed';
       return thunkAPI.rejectWithValue(message);
     }
   }

@@ -38,6 +38,10 @@ const Register = () => {
     selectedLanguages: [],
   });
   const [passwordError, setPasswordError] = useState('');
+  const [errorMessages, setErrorMessages] = useState({
+    languages: '',
+    server: '',
+  });
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -55,6 +59,16 @@ const Register = () => {
       dispatch(reset());
     };
   }, [user, isSuccess, navigate, dispatch]);
+
+  useEffect(() => {
+    if (isError) {
+      if (errorMessage && errorMessage.toLowerCase().includes('language')) {
+        setErrorMessages({ ...errorMessages, languages: 'Please select at least one programming language' });
+      } else {
+        setErrorMessages({ ...errorMessages, server: errorMessage });
+      }
+    }
+  }, [isError, errorMessage]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -79,6 +93,14 @@ const Register = () => {
       ...prevState,
       selectedLanguages: event.target.value,
     }));
+    
+    // Clear language error if languages are selected
+    if (event.target.value.length > 0) {
+      setErrorMessages((prevErrors) => ({
+        ...prevErrors,
+        languages: ''
+      }));
+    }
   };
 
   const handleSubmit = (e) => {
@@ -98,6 +120,7 @@ const Register = () => {
       languages: formData.selectedLanguages,
     };
 
+    console.log('Submitting user data:', userData);
     dispatch(register(userData));
   };
 
@@ -129,7 +152,7 @@ const Register = () => {
         </Typography>
         {isError && (
           <Alert severity="error" sx={{ width: '100%', mt: 2 }}>
-            {errorMessage}
+            {errorMessages.server || errorMessage || 'Registration failed. Please try again.'}
           </Alert>
         )}
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
@@ -183,7 +206,7 @@ const Register = () => {
             error={!!passwordError}
             helperText={passwordError}
           />
-          <FormControl fullWidth margin="normal">
+          <FormControl fullWidth margin="normal" error={!!errorMessages.languages}>
             <InputLabel id="languages-label">Programming Languages</InputLabel>
             <Select
               labelId="languages-label"
@@ -205,6 +228,11 @@ const Register = () => {
                 </MenuItem>
               ))}
             </Select>
+            {errorMessages.languages && (
+              <Typography color="error" variant="caption">
+                {errorMessages.languages}
+              </Typography>
+            )}
           </FormControl>
           <Button
             type="submit"
